@@ -1,0 +1,268 @@
+
+*{
+    box-sizing: border-box;
+}
+
+
+body{
+    font-size: 1.1rem;
+}
+
+
+main{
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    border: solid 2px red;
+    padding: 5em 0;
+}
+
+    
+
+
+
+
+
+    .newElementWrapper {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 10px;
+    }
+    
+    .tool {
+        position: relative;
+        margin-right: 10px;       
+    }
+        .add{
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid #444444;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+    
+    .content {
+        border: 1px solid #ccc;
+        padding: 10px;
+        flex-grow: 1;
+    }
+    
+    .tools {
+        display: flex;
+        gap: 10px;
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 5px;
+        z-index: 1;
+    }
+    
+    .tool_button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+        .tool_button svg{
+            width: 20px;
+            height: 20px;
+        }
+    
+    .title_descr {
+        margin-bottom: 20px;
+    }
+    
+    .tools_wrap {
+        position: absolute;
+        top: -13px;
+        left: 40px;
+        display: none;
+        border: solid 2px forestgreen;
+    }
+    
+    .tools_wrap.visible {
+        display: flex;
+    }
+
+    .image_element{
+        max-width: 500px;
+        overflow: hidden;
+    }
+    .image_element img{
+        width: 100%;
+        height: auto;
+    }
+    
+
+    .formatting-tools {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        padding: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        gap: 5px;
+    }
+    
+    .formatting-tools button {
+        background: none;
+        border: 1px solid #ccc;
+        padding: 5px;
+        cursor: pointer;
+    }
+    
+    .link-input {
+        display: none;
+        width: 200px;
+        margin-left: 5px;
+        padding: 5px;
+        border: 1px solid #ccc;
+    }
+    
+
+
+
+
+
+    /* styles.css */
+        #popup_container{
+            display: none;
+            position: fixed;
+            /* center */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: solid 2px black;
+            background: lightgray;
+            padding: 20px;
+        }
+
+            #popup{
+                border: solid 2px red;
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+                .popup__explanation{
+                    margin-bottom: 20px;
+                    font-size: 1.2rem;
+                }
+                .popup__input{
+                    border: solid 2px black;
+                    padding: 10px;
+                    display: block;
+                    width: 300px;
+                }
+                #popup__wrap{
+                    display: flex;
+                    gap: 10px;
+                    padding: 10px;
+                }
+                    #popup__wrap input, #popup__wrap select{
+                        padding: 10px 20px;
+                        min-width: 250px;
+                        font-size: 1.2rem;
+                        border: solid 2px yellow;
+                    }
+
+
+                #popup__button{
+                    display: block;
+                    padding: 10px 20px;
+                    font-size: 1.2rem;
+                    cursor: pointer;
+                    margin: 0 auto;
+                    width: 200px;
+                }
+            
+
+
+/* app styles all styles here are important  */
+
+#postWrapp{
+    border: solid 2px gray;
+    padding: 20px;
+    width: 80%;
+    max-width: 1000px;
+}
+
+#content_container{
+    padding: 20px;
+    font-size: 1.1rem;
+    border: solid 2px rgb(0, 0, 0);
+    width: 100%;
+    line-height: 1.5rem;
+    min-width: 250px;
+    overflow: hidden;
+    min-height: 500px;
+}
+
+    /* images */
+    .img_content_wrap{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+        padding: 20px;
+    }
+    #content_container img{
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 80%;
+    }
+
+    /* headers */
+    #content_container h1, #content_container h2, #content_container h3, #content_container h4, #content_container h5, #content_container h6{
+        display: block;
+        width: 100%;
+        padding: 15px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+         #content_container h1{
+            font-size: 2.5rem;
+         }
+            #content_container h2{
+                font-size: 2rem;
+            }
+                #content_container h3{
+                    font-size: 1.8rem;
+                }
+                    #content_container h4{
+                        font-size: 1.6rem;
+                    }
+                        #content_container h5{
+                            font-size: 1.4rem;
+                        }
+                            #content_container h6{
+                                font-size: 1.2rem;
+                            }
+
+
+    /* ifame video */
+    .iframe_content_wrap{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+        padding: 10px;
+        width: 100%;
+    }
+        #content_container iframe{
+            display: block;
+            width: 100%;
+            height: 400px;
+            max-width: 80%;
+        }
+
+
+
+        

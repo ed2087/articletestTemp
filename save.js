@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ///////////////////// Show Popup Function /////////////////////
 
+
 const listenToCancelBUtton = () => {    
     getById("cancel_popup__button").addEventListener('click', (e) => {
         const popupContainer = getById('popup_container');
@@ -100,12 +101,15 @@ const listenToCancelBUtton = () => {
     });
 };
 
+
 const showPopup = () => {
     const popupContainer = getById('popup_container');
     popupContainer.innerHTML = popUp_template();
     popupContainer.style.display = 'block';
     listenToCancelBUtton();
 };
+
+
 
 const popUp_template = () => {
     const elements = [
@@ -126,7 +130,6 @@ const popUp_template = () => {
         { value: 'table', display: 'Table' },
         { value: 'code', display: 'Code Block' },
         { value: 'block quote', display: 'Block Quote' },
-        { value: 'math', display: 'Math (LaTeX)' },
         // { value: 'paragraph', display: 'Paragraph' },
         // { value: 'website embed', display: 'Website Embed' },
     ];
@@ -157,9 +160,6 @@ const cancelButton = () => {
 const handleElementSelection = (value) => {
     const popupContainer = getById('popup_container');
     switch (value) {
-        case 'math':
-            popupContainer.innerHTML = math_popup(value);
-            break;
         case 'link':
             popupContainer.innerHTML = link_popup(value);
             break;
@@ -216,7 +216,7 @@ const handleElementSelection = (value) => {
             break;
         case 'image':
             popupContainer.innerHTML = image_popup(value);
-            break;
+            break
         default:
             break;
     }
@@ -253,10 +253,6 @@ const addSelectedElement = () => {
     let replacementText = '';
 
     switch (selectedValue) {
-        case 'math':
-            const mathText = getById('math_text').value;
-            replacementText = `&#8204;<span class="mathjax" style="${style}">${mathText}</span>&#8204;`;
-            break;
         case 'link':
             const linkName = getById('link_name').value;
             const linkURL = getById('link_url').value;
@@ -359,6 +355,12 @@ const addSelectedElement = () => {
         case 'image':
             const imageFile = getById('image_file').files[0];
 
+            //1.we need to upload to cdatabase and cloaudanary get link back
+            //2. then we can use that link to display the image
+            //3. we can also use the link to download the image optional-maybe
+            //4.detect if image is too large and resize it
+            //5. check if image has been deleted from content and if so delete from cloudinary and database
+
             if (imageFile) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -389,11 +391,7 @@ const updateContentContainer = (replacementText) => {
     const content = contentContainer.innerHTML;
     contentContainer.innerHTML = content.replace('new()', replacementText);
     moveCursorToEndOfElement(contentContainer);
-
-    // Reprocess MathJax elements
-    MathJax.typeset();
 };
-
 
 const moveCursorToEndOfElement = (element) => {
     const range = document.createRange();
@@ -405,17 +403,6 @@ const moveCursorToEndOfElement = (element) => {
 };
 
 ///////////////////// Popup Templates /////////////////////
-const math_popup = (value) => {
-    return `
-        <p class="popup__explanation">Enter LaTeX</p>
-        <div class="popup__wrap" id="popup__wrap">
-            <textarea class="popup__input" id="math_text" placeholder="Enter LaTeX code here..."></textarea>
-            ${inline_element_text_tools(value)}
-        </div>
-        <input type="hidden" id="element_type" value="${value}">
-        <button class="popup__button" id="popup__button">Add</button>
-    `;
-};
 
 const link_popup = (value) => {
     return `
@@ -626,6 +613,7 @@ const websiteEmbed_popup = (value) => {
     `;
 };
 
+
 const image_popup = (value) => {
     return `
         <p class="popup__explanation">Upload image</p>
@@ -636,6 +624,8 @@ const image_popup = (value) => {
         <button class="popup__button" id="popup__button">Add</button>
     `;
 }
+
+
 
 ///////////////////// Inline Element Text Tools /////////////////////
 
@@ -670,6 +660,8 @@ const inline_element_text_tools = (mainStyle) => {
         </div>
     `;
 };
+
+
 
 // Function to attach event listeners to the popup elements
 const attachPopupEventListeners = () => {
@@ -734,6 +726,7 @@ const attachPopupEventListeners = () => {
     applyInitialStyles();
 };
 
+
 getById('content_container').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') {
         e.preventDefault(); // Prevent the default action (creating a new div)
@@ -741,3 +734,5 @@ getById('content_container').addEventListener('keydown', function (e) {
         return false;
     }
 });
+
+
