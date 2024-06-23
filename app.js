@@ -3,6 +3,7 @@ console.log('post.js loaded');
 // Initialize global variables
 let idTracker = 0;
 const contentContainer = getById('content_container');
+let storeImages = [];
 
 // Text templates for the title and description
 const titleText = 'Tell us your Story.....';
@@ -43,16 +44,19 @@ const descriptionElement = getById('description');
 const texteditor = getById('content_container');
 
 if (titleElement) {
+    titleElement.classList.add('editablecontent_item');
     titleElement.addEventListener('focus', wipeOnClick);
     titleElement.addEventListener('blur', restoreTextIfEmpty);
 }
 
 if (descriptionElement) {
+    descriptionElement.classList.add('editablecontent_item');
     descriptionElement.addEventListener('focus', wipeOnClick);
     descriptionElement.addEventListener('blur', restoreTextIfEmpty);
 }
 
 if (texteditor) {
+    texteditor.classList.add('editablecontent_item');
     texteditor.addEventListener('focus', wipeOnClick);
     texteditor.addEventListener('blur', restoreTextIfEmpty);
 }
@@ -64,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const checkForCommand = () => {
         console.log(contentContainer.textContent);
-        if (contentContainer.textContent.includes('new()')) { 
+        if (contentContainer.textContent.includes(';;')) { 
             showPopup();
         }
     };
@@ -109,24 +113,24 @@ const showPopup = () => {
 
 const popUp_template = () => {
     const elements = [
+        { value: 'bold', display: 'Bold Text' },
+        { value: 'italic', display: 'Italic Text' },
+        { value: 'link', display: 'Hyperlink' },
         { value: 'heading 1', display: 'Large Heading (H1)' },
         { value: 'heading 2', display: 'Medium Heading (H2)' },
         { value: 'heading 3', display: 'Small Heading (H3)' },
-        { value: 'bold', display: 'Bold Text' },
-        { value: 'italic', display: 'Italic Text' },
-        { value: 'underline', display: 'Underlined Text' },
-        { value: 'strikethrough', display: 'Strikethrough Text' },
-        { value: 'strong', display: 'Strong Emphasis Text' },
-        { value: 'link', display: 'Hyperlink' },
-        { value: 'image', display: 'Image' },
-        { value: 'pdf', display: 'PDF Document' },
-        { value: 'iframe', display: 'Embedded Frame (iFrame)' },
-        { value: 'ordered list', display: 'Ordered List (Numbered)' },
-        { value: 'unordered list', display: 'Unordered List (Bulleted)' },
-        { value: 'table', display: 'Table' },
-        { value: 'code', display: 'Code Block' },
-        { value: 'block quote', display: 'Block Quote' },
         { value: 'math', display: 'Math (LaTeX)' },
+        { value: 'unordered list', display: 'List' },
+        // { value: 'ordered list', display: 'Ordered List (Numbered)' },
+        { value: 'image', display: 'Image' },
+        { value: 'underline', display: 'Underlined Text' },
+        { value: 'block quote', display: 'Block Quote' },
+        { value: 'code', display: 'Code Block' },
+        { value: 'table', display: 'Table' },
+        { value: 'iframe', display: 'Embed - youtube, vimeo, etc' },
+        { value: 'pdf', display: 'PDF Document' },
+        { value: 'strikethrough', display: 'Strikethrough Text' },
+        { value: 'strong', display: 'Strong Emphasis Text' }
         // { value: 'paragraph', display: 'Paragraph' },
         // { value: 'website embed', display: 'Website Embed' },
     ];
@@ -234,7 +238,26 @@ const handleElementSelection = (value) => {
 
 ///////////////////// Add Selected Element Function /////////////////////
 
-const addSelectedElement = () => {
+
+function getEmbedURL(url) {
+    let embedURL = '';
+    const youtubeMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+    const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+
+    if (youtubeMatch && youtubeMatch[1]) {
+        embedURL = `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    } else if (vimeoMatch && vimeoMatch[1]) {
+        embedURL = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+
+    return embedURL;
+}
+
+
+//tikers
+let forms = 0;
+let list = 0;
+const addSelectedElement = async () => {
     const popupContainer = getById('popup_container');
     const contentContainer = getById('content_container');
 
@@ -299,24 +322,61 @@ const addSelectedElement = () => {
             break;
         case 'iframe':
             const iframeURL = getById('iframe_url').value;
-            replacementText = `
-                &#8204;<div class="iframe_content_wrap">
-                    <iframe src="${iframeURL}" style="${style}"></iframe>
-                </div>&#8204;
-            `;
+            const embedURL = getEmbedURL(iframeURL);
+            
+            if (embedURL) {
+                replacementText = `
+                    &#8204;<div class="iframe_content_wrap">
+                        <iframe src="${embedURL}" style="${style}"></iframe>
+                    </div>&#8204;
+                `;
+            } else {
+                // Handle invalid URL or unsupported video service
+                replacementText = '';
+            }
             break;
         case 'ordered list':
-            const orderedListItems = getById('ordered_list_items').value.split(',').map(item => item.trim());
-            replacementText = `&#8204;<ol style="${style}">${orderedListItems.map(item => `<li>${item}</li>`).join('')}</ol>&#8204;`;
-            break;
+            const orderedListItemsCount = parseInt(getById('ordered_list_items_count').value);
+            let orderedListItems = '';
+            for (let i = 0; i < orderedListItemsCount; i++) {
+                orderedListItems += `<li class="editablecontent_item" contenteditable="true">Item ${i + 1}</li>`;
+            }
+            replacementText = `&#8204;<ol style="${style}">${orderedListItems}</ol>&#8204;`;
+            break;        
         case 'unordered list':
-            const unorderedListItems = getById('unordered_list_items').value.split(',').map(item => item.trim());
-            replacementText = `&#8204;<ul style="${style}">${unorderedListItems.map(item => `<li>${item}</li>`).join('')}</ul>&#8204;`;
+                const listStyleType = getById('list_style_type').value;
+                const unorderedListItem = `<li class="unordered_li editablecontent_item" style="list-style-type: ${listStyleType}; ${style}" contenteditable="true"></li>`;
+                replacementText = `&#8204;<ul class="unordered_ul" style="margin: 20px 0; list-style-type: ${listStyleType}; ${style}">${unorderedListItem}</ul>&#8204;`;
             break;
         case 'table':
+            forms++;
             const rows = parseInt(getById('table_rows').value);
             const cols = parseInt(getById('table_cols').value);
-            let tableHTML = `&#8204;<table border="1" style="${style}">`;
+            const tableId = `dynamicTable${forms}`;
+        
+            let tableButtons = `
+                <div class="content_ele_buttons_wrap">
+                    <button class="content_ele_button addRow" data-table-id="${tableId}">+ Add Row</button>
+                    <button class="content_ele_button addColumn" data-table-id="${tableId}">+ Add Column</button>
+                </div>
+            `;
+        
+            let tableHTML = `
+                &#8204;<div class="tableWrap">
+                    <table border="1" style="${style}" id="${tableId}"> 
+                        ${tableButtons}                  
+                        <thead>
+                            <tr>
+            `;
+        
+            // Add the header row
+            for (let j = 0; j < cols; j++) {
+                tableHTML += `<th>Header ${j + 1}</th>`;
+            }
+            tableHTML += '</tr></thead>';
+        
+            // Add the body rows
+            tableHTML += '<tbody>';
             for (let i = 0; i < rows; i++) {
                 tableHTML += '<tr>';
                 for (let j = 0; j < cols; j++) {
@@ -324,9 +384,9 @@ const addSelectedElement = () => {
                 }
                 tableHTML += '</tr>';
             }
-            tableHTML += '</table>&#8204;';
+            tableHTML += '</tbody></table></div>&#8204;';
             replacementText = tableHTML;
-            break;
+            break;                                  
         case 'code':
             const codeText = getById('code_text').value;
             replacementText = `&#8204;<pre><code style="${style}">${codeText}</code></pre>&#8204;`;
@@ -358,37 +418,84 @@ const addSelectedElement = () => {
             break;
         case 'image':
             const imageFile = getById('image_file').files[0];
-
             if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const imageDataUrl = e.target.result;
-                    const imageFileName = imageFile.name;
-                    replacementText = `
-                        &#8204;<div class="img_content_wrap">
-                            <img src="${imageDataUrl}" alt="${imageFileName}" style="${style}">                            
-                        </div>&#8204;
-                    `;
-                    updateContentContainer(replacementText);
-                };
-                reader.readAsDataURL(imageFile);
-                popupContainer.style.display = 'none';
-                return;
+
+                const formData = new FormData();
+                // Create a unique object ID for the image
+                const objectID = generateObjectId();
+                // Add the image file and object ID to the form data
+                formData.append('images', imageFile);
+                // Add the object ID to the form data
+                formData.append('objectID', objectID);
+                // Add the CSRF token to the form data
+                const csrfToken = document.getElementById('_csrf').value;
+                // Add the CSRF token to the form data
+                formData.append('_csrf', csrfToken);
+
+                //add loading bar to show image is being uploaded popup_container
+                getById("popup_container").innerHTML = loadingBarTemplate();
+
+                try {
+                    const response = await fetch('/upload/images', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-Token': csrfToken
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        const imageData = result.images[0];
+                        replacementText = `
+                            &#8204;<div class="img_content_wrap">
+                                <img src="${imageData.url}" alt="${imageFile.name}" id="${imageData.public_id}" style="${style}" data-public-id="${imageData.public_id}">                            
+                            </div>&#8204;
+                        `;
+                        
+                        updateContentContainer(replacementText);
+
+                    } else {
+                        console.error(result.error);
+                    }
+                } catch (error) {
+                    console.error('An error occurred during image upload', error);
+                }
             }
-            break;
+            popupContainer.style.display = 'none';
+            return;
         default:
             console.log('Unknown element selected');
             break;
     }
+
     updateContentContainer(replacementText);
+    const firstListItem = contentContainer.querySelector('li');
+    //moveCursorToElement(firstListItem);
     popupContainer.style.display = 'none';
+
 };
 
+
 const updateContentContainer = (replacementText) => {
+
+    console.log(replacementText)
     const contentContainer = getById('content_container');
     const content = contentContainer.innerHTML;
-    contentContainer.innerHTML = content.replace('new()', replacementText);
-    moveCursorToEndOfElement(contentContainer);
+    contentContainer.innerHTML = content.replace(';;', replacementText);    
+
+
+    //if replacement !== unordered_ul class
+    if (!replacementText.includes('unordered_ul')) {
+        console.log('not unordered_ul')
+        moveCursorToEndOfElement(contentContainer);
+    }
+    //if unordered_ul focus on the li
+    if (replacementText.includes('unordered_ul')) {
+        console.log('unordered_ul')
+        const lastLi = contentContainer.querySelector('.unordered_li');
+        lastLi.focus();
+    }
 
     // Reprocess MathJax elements
     MathJax.typeset();
@@ -513,25 +620,39 @@ const iframe_popup = (value) => {
 
 const orderedList_popup = (value) => {
     return `
-        <p class="popup__explanation">Enter list items (separated by commas)</p>
+        <p class="popup__explanation">Enter the number of list items</p>
         <div class="popup__wrap" id="popup__wrap">
-            <textarea class="popup__input" id="ordered_list_items" placeholder="Item 1, Item 2, Item 3"></textarea> 
+            <input type="number" class="popup__input" id="ordered_list_items_count" placeholder="Number of items">
         </div>
         <input type="hidden" id="element_type" value="${value}">
         <button class="popup__button" id="popup__button">Add</button>
     `;
 };
 
+
 const unorderedList_popup = (value) => {
     return `
-        <p class="popup__explanation">Enter list items (separated by commas)</p>
+        <p class="popup__explanation">Select the list style</p>
         <div class="popup__wrap" id="popup__wrap">
-            <textarea class="popup__input" id="unordered_list_items" placeholder="Item 1, Item 2, Item 3"></textarea>
+            <select class="popup__input" id="list_style_type">
+                <option value="" disabled selected>Select a list style...</option>
+                <option value="disc">Disc</option>
+                <option value="circle">Circle</option>
+                <option value="square">Square</option>
+                <option value="decimal">Decimal</option>
+                <option value="lower-alpha">Lower Alpha</option>
+                <option value="upper-alpha">Upper Alpha</option>
+                <option value="lower-roman">Lower Roman</option>
+                <option value="upper-roman">Upper Roman</option>
+                <option value="none">None</option>
+            </select>
         </div>
         <input type="hidden" id="element_type" value="${value}">
         <button class="popup__button" id="popup__button">Add</button>
     `;
 };
+
+
 
 const table_popup = (value) => {
     return `
@@ -544,6 +665,7 @@ const table_popup = (value) => {
         <button class="popup__button" id="popup__button">Add</button>
     `;
 };
+
 
 const code_popup = (value) => {
     return `
@@ -643,6 +765,7 @@ const image_popup = (value) => {
 const inline_element_text_tools = (mainStyle) => {
     return `
         <div class="popup_stylesWrap">
+
             <div class="popup_style_item">
                 <label for="text_color">Text Color:</label>
                 <input type="color" class="popup__input" id="text_color" value="#000000" placeholder="Color">
@@ -666,7 +789,8 @@ const inline_element_text_tools = (mainStyle) => {
                     <option value="Trebuchet MS">Trebuchet MS</option>
                     <option value="Arial Black">Arial Black</option>
                 </select>
-            </div>
+            </div> 
+
         </div>
     `;
 };
@@ -741,3 +865,243 @@ getById('content_container').addEventListener('keydown', function (e) {
         return false;
     }
 });
+
+
+//back end jobs 
+//1.find create a unique id for each post to add to the images so that we can delete them if not used on post
+//2.get all the data from the post and save it to the database
+//3.get the images from the post and save them to the database
+//4.delete the images that are not used on the post
+
+document.addEventListener('DOMContentLoaded', () => {
+    const contentContainer = getById('content_container');
+
+    const observer = new MutationObserver((mutationsList) => {
+        const imagesToDelete = new Set();
+
+        mutationsList.forEach(mutation => {
+            mutation.removedNodes.forEach(node => {
+                collectImagesToDelete(node, imagesToDelete);
+            });
+        });
+
+        imagesToDelete.forEach(publicId => {
+            // Check if the image still exists in the contentContainer before deleting
+            if (!document.querySelector(`img[data-public-id="${publicId}"]`)) {
+                deleteImage(publicId);
+            }
+        });
+    });
+
+    observer.observe(contentContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true, // Observe attribute changes
+    });
+
+    const collectImagesToDelete = (node, imagesToDelete) => {
+        if (node.nodeType === 1) { // Element node
+            if (node.tagName === 'IMG' && node.dataset.publicId) {
+                imagesToDelete.add(node.dataset.publicId);
+            } else if (node.classList && node.classList.contains('img_content_wrap')) {
+                // If the parent container is removed, check if it contains an image
+                const img = node.querySelector('img[data-public-id]');
+                if (img) {
+                    imagesToDelete.add(img.dataset.publicId);
+                }
+            }
+        }
+
+        // Recursively check child nodes to handle nested deletions
+        if (node.childNodes.length > 0) {
+            node.childNodes.forEach(childNode => collectImagesToDelete(childNode, imagesToDelete));
+        }
+    };
+
+    const deleteImage = async (publicId) => {
+        const csrfToken = document.getElementById('_csrf').value;
+    
+        try {
+            const response = await fetch(`/delete/images/${publicId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-Token': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ public_id: publicId })
+            });
+    
+            const result = await response.json();
+            if (response.ok) {
+                console.log(result.message);
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('An error occurred during image deletion', error);
+        }
+    };
+
+
+    /////////////////// Function to handle keydown events for lists  ////////////////////////
+
+
+    const handleListKeyDown = (event) => {
+        console.log('Keydown event:', event.key);
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) return;
+        const range = selection.getRangeAt(0);
+        const currentElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer;
+        console.log('Current element:', currentElement);
+    
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            console.log('Enter key pressed');
+            if (currentElement.tagName === 'LI' && currentElement.textContent.trim() !== '') {
+                const newLi = document.createElement('li');
+                newLi.className = 'editablecontent_item';
+                newLi.contentEditable = 'true';
+                newLi.textContent = '';
+                newLi.style.listStyleType = currentElement.style.listStyleType;
+                currentElement.insertAdjacentElement('afterend', newLi);
+                console.log('New list item created:', newLi);
+                moveCursorToElement(newLi);
+            }
+        }
+    
+        if (event.key === 'Tab' && !event.shiftKey) {
+            event.preventDefault();
+            console.log('Tab key pressed');
+            if (currentElement.tagName === 'LI') {
+                handleListTab(currentElement);
+            }
+        }
+    
+        if (event.key === 'Tab' && event.shiftKey) {
+            event.preventDefault();
+            console.log('Shift+Tab key pressed');
+            if (currentElement.tagName === 'LI') {
+                handleListShiftTab(currentElement);
+            }
+        }
+    };
+    
+    const handleListTab = (currentElement) => {
+        console.log('Handling Tab for element:', currentElement);
+        const parentList = currentElement.parentElement;
+        let newList;
+        if (currentElement.previousElementSibling && currentElement.previousElementSibling.tagName === 'UL') {
+            newList = currentElement.previousElementSibling;
+        } else {
+            newList = document.createElement('ul');
+            newList.style.listStyleType = currentElement.style.listStyleType;
+            if (currentElement.previousElementSibling) {
+                currentElement.previousElementSibling.insertAdjacentElement('afterend', newList);
+            } else {
+                parentList.insertAdjacentElement('afterbegin', newList);
+            }
+        }
+        newList.appendChild(currentElement);
+        console.log('New sublist created and element moved:', newList, currentElement);
+        moveCursorToElement(currentElement);
+    };
+    
+    const handleListShiftTab = (currentElement) => {
+        console.log('Handling Shift+Tab for element:', currentElement);
+        const parentList = currentElement.parentElement;
+        const grandParent = parentList.parentElement.closest('ul, ol');
+        if (grandParent) {
+            parentList.removeChild(currentElement);
+            grandParent.insertBefore(currentElement, parentList.nextSibling);
+            currentElement.style.listStyleType = grandParent.style.listStyleType;
+            console.log('Element moved up a level:', currentElement);
+            moveCursorToElement(currentElement);
+            if (parentList.children.length === 0) {
+                parentList.remove();
+                console.log('Parent list removed:', parentList);
+            }
+        } else {
+            console.log('Cannot move element up further');
+        }
+    };
+    
+    const moveCursorToElement = (element) => {
+        console.log('Moving cursor to element:', element);
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(element);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        element.focus();
+        console.log('Cursor moved to element:', element);
+    };
+    
+    // Placeholder for checkForCommand function
+    const checkForCommand = (event) => {
+        console.log('Command check:', event);
+    };
+    
+    contentContainer.addEventListener('keydown', handleListKeyDown);
+    contentContainer.addEventListener('input', checkForCommand);
+    contentContainer.addEventListener('keyup', checkForCommand);
+    contentContainer.addEventListener('change', checkForCommand);
+
+
+
+    contentContainer.addEventListener('click', (e) => {
+        if (e.target && e.target.classList.contains('addRow')) {
+            const tableId = e.target.dataset.tableId;
+            addRow(tableId);
+        } else if (e.target && e.target.classList.contains('addColumn')) {
+            const tableId = e.target.dataset.tableId;
+            addColumn(tableId);
+        }
+    });
+
+
+});
+
+
+
+
+
+function addRow(tableId) {
+    const table = document.getElementById(tableId);
+    const tbody = table.getElementsByTagName('tbody')[0];
+    const cols = table.getElementsByTagName('thead')[0].rows[0].cells.length;
+    const newRow = tbody.insertRow();
+
+    for (let i = 0; i < cols; i++) {
+        const newCell = newRow.insertCell();
+        newCell.innerText = 'Cell';
+    }
+}
+
+function addColumn(tableId) {
+    const table = document.getElementById(tableId);
+    const thead = table.getElementsByTagName('thead')[0];
+    const tbody = table.getElementsByTagName('tbody')[0];
+
+    // Add a new header cell
+    const newHeaderCell = document.createElement('th');
+    newHeaderCell.innerText = `Header ${thead.rows[0].cells.length + 1}`;
+    thead.rows[0].appendChild(newHeaderCell);
+
+    // Add a new cell to each row in the body
+    for (let row of tbody.rows) {
+        const newCell = row.insertCell();
+        newCell.innerText = 'Cell';
+    }
+}
+
+
+
+
+
+
+
+
+
+// control + z  -- fix images problem allow images to be       
+

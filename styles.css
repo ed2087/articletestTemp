@@ -1,12 +1,4 @@
 
-*{
-    box-sizing: border-box;
-}
-
-
-body{
-    font-size: 1.1rem;
-}
 
 
 main{
@@ -263,6 +255,82 @@ main{
             max-width: 80%;
         }
 
+
+/* order list */
+#content_container ol{
+    padding: 20px;
+    margin: 20px 0;
+}
+    #content_container ol li{
+        margin-bottom: 10px;
+    }
+
+/* unoeder list */
+/* #content_container {
+    padding: 20px;
+    margin: 20px 0;
+} */
+
+#content_container ul, #content_container ol {
+    padding-left: 40px;
+    margin: 20px 0;
+}
+
+#content_container ul li, #content_container ol li {
+    margin-bottom: 10px;
+}
+
+.editablecontent_item {
+    list-style-type: disc; /* Default list style */
+}
+
+#content_container ul {
+    list-style-type: disc; /* Level 1 */
+}
+
+#content_container ul ul {
+    list-style-type: circle; /* Level 2 */
+}
+
+#content_container ul ul ul {
+    list-style-type: square; /* Level 3 */
+}
+
+#content_container ul ul ul ul {
+    list-style-type: decimal; /* Level 4 */
+}
+
+#content_container ul ul ul ul ul {
+    list-style-type: lower-alpha; /* Level 5 */
+}
+
+#content_container ul ul ul ul ul ul {
+    list-style-type: lower-roman; /* Level 6 */
+}
+
+/* Table center */
+#content_container table {
+    margin: 20px auto;
+    border-collapse: collapse;
+    width: 100%;
+    border: solid 2px red;
+}
+
+#content_container th, #content_container td {
+    border: solid 1px black;
+    padding: 10px;
+}
+
+/* Table wrapper for horizontal scrolling */
+.tableWrap {
+    overflow-x: auto;
+}
+
+.tableWrap table {
+    width: 100%;
+    max-width: none;
+    min-width: 600px; /* Adjust based on minimum readable width */
+}
 
 
         
